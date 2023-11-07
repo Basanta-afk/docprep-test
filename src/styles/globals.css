@@ -1,0 +1,71 @@
+/* @tailwind base; */
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Crimson+Text&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Crimson Text", serif;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: #faf8f0;
+}
+
+.dynamic-x-padding {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 550px) {
+  .dynamic-x-padding {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
+
+@media (min-width: 770px) {
+  .dynamic-x-padding {
+    padding-left: 5rem;
+    padding-right: 5rem;
+  }
+}
+
+.dynamic-xx-padding {
+  padding-left: 20rem;
+  padding-right: 20rem;
+}
+
+.dynamic-y-padding {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.check {
+  border: 2px solid red;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  color: #552a7b;
+}
+
+img {
+  height: 100%;
+  width: 100%;
+}

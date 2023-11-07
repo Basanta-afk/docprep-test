@@ -1,0 +1,47 @@
+steps:
+  - name: gcr.io/cloud-builders/git
+    args:
+      [
+        "clone",
+        "-b",
+        "${TAG_NAME}",
+        "--single-branch",
+        "https://ktmbees:${_GIT_TOKEN_}@github.com/KtmBeesTech/ekarja-frontend.git",
+      ]
+
+  - name: gcr.io/cloud-builders/docker
+    args:
+      [
+        "build",
+        "--build-arg",
+        "GITHUB_TOKEN=${_GIT_TOKEN_}",
+        "--build-arg",
+        "_ENV=${_ENV}",
+        "-t",
+        "gcr.io/$PROJECT_ID/ekarjafrontend:${TAG_NAME}",
+        "--file=Dockerfile",
+        ".",
+      ]
+
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/ekarjafrontend:${TAG_NAME}"]
+
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "run",
+        "deploy",
+        "ekarja-frontend",
+        "--image",
+        "gcr.io/$PROJECT_ID/ekarjafrontend:${TAG_NAME}",
+        "--region",
+        "us-west1",
+        "--platform",
+        "managed",
+        "--max-instances",
+        "2",
+        "--allow-unauthenticated",
+      ]
+timeout: 3000s
+substitutions:
+  _TAG: "v1.0.0"
