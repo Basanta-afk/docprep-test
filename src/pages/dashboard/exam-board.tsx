@@ -35,7 +35,7 @@ const ExamBoard = () => {
     reset,
     setValue,
     formState: { errors },
-  } = useForm({
+  }: any = useForm<any>({
     defaultValues: {
       examBoard: {
         name: "",
