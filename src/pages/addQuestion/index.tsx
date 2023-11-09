@@ -1,17 +1,23 @@
+import { APIGetAllSubjects } from "@/apis/subject/subject";
 import TextEditor from "@/components/common/TextEditor";
 import CommonSelect from "@/components/common/form/CommonSelect";
+import { questionsDTO } from "@/utils/formatters/questionsDTO";
 import showNotify from "@/utils/notify";
 import { Button, Group, Radio } from "@mantine/core";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Search } from "lucide-react";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-const index = () => {
-  const [data, setData] = useState("option1");
+const Index = () => {
+  const [correctOption, setCorrectOption] = useState("option1");
+  console.log(correctOption);
+
   const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
 
   const router = useRouter();
+
   const {
     control,
     getValues,
@@ -32,18 +38,37 @@ const index = () => {
       option4: "",
       reason: "",
     },
+    mode: "onChange",
   });
+
+  const getSubjects = async () => {
+    try {
+      const subjects = await APIGetAllSubjects();
+      setLoading(false);
+      console.log({ subjects });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const onSubmit = async (data: any) => {
     try {
       setLoading(true);
+      console.log(data, correctOption);
 
-      router.back();
+      const formData = questionsDTO.addQuestions(data, correctOption);
+
+      console.log(formData);
     } catch (error) {
       setLoading(false);
       showNotify("error", "Unable to add Question...");
     }
   };
+
+  useEffect(() => {
+    getSubjects();
+  }, []);
+
   return (
     <main className="grid grid-cols-2 gap-4 bg-[#EFF0F6] p-5 h-[100vh]">
       <form className=" bg-white  p-3" onSubmit={handleSubmit(onSubmit)}>
@@ -69,7 +94,9 @@ const index = () => {
               render={({ field: { value, onChange } }) => (
                 <CommonSelect
                   placeholder="Question type"
-                  data={["React", "Angular", "Vue", "Svelte"]}
+                  data={["Old", "New"]}
+                  onChange={onChange}
+                  value={value}
                 />
               )}
             />
@@ -86,6 +113,8 @@ const index = () => {
                 <CommonSelect
                   placeholder="Subject"
                   data={["React", "Angular", "Vue", "Svelte"]}
+                  onChange={onChange}
+                  value={value}
                 />
               )}
             />
@@ -102,6 +131,8 @@ const index = () => {
                 <CommonSelect
                   placeholder="Chapter"
                   data={["React", "Angular", "Vue", "Svelte"]}
+                  onChange={onChange}
+                  value={value}
                 />
               )}
             />
@@ -116,7 +147,11 @@ const index = () => {
               required: "Required",
             }}
             render={({ field: { value, onChange } }) => (
-              <TextEditor placeholder="Question" />
+              <TextEditor
+                placeholder="Question"
+                onChange={onChange}
+                value={value}
+              />
             )}
           />
         </section>
@@ -130,7 +165,11 @@ const index = () => {
           </div>
         </div>
 
-        <Radio.Group className="pt-3" value={data} onChange={setData}>
+        <Radio.Group
+          className="pt-3"
+          value={correctOption}
+          onChange={setCorrectOption}
+        >
           <Group className="grid grid-cols-2">
             <div className="flex w-full">
               <div className="px-2">
@@ -145,7 +184,11 @@ const index = () => {
                     required: "Required",
                   }}
                   render={({ field: { value, onChange } }) => (
-                    <TextEditor placeholder="Option 1" />
+                    <TextEditor
+                      placeholder="Option 1"
+                      onChange={onChange}
+                      value={value}
+                    />
                   )}
                 />
               </div>
@@ -163,7 +206,11 @@ const index = () => {
                     required: "Required",
                   }}
                   render={({ field: { value, onChange } }) => (
-                    <TextEditor placeholder="Option 2" />
+                    <TextEditor
+                      placeholder="Option 2"
+                      onChange={onChange}
+                      value={value}
+                    />
                   )}
                 />
               </div>
@@ -181,7 +228,11 @@ const index = () => {
                     required: "Required",
                   }}
                   render={({ field: { value, onChange } }) => (
-                    <TextEditor placeholder="Option 3" />
+                    <TextEditor
+                      placeholder="Option 3"
+                      onChange={onChange}
+                      value={value}
+                    />
                   )}
                 />
               </div>
@@ -199,7 +250,11 @@ const index = () => {
                     required: "Required",
                   }}
                   render={({ field: { value, onChange } }) => (
-                    <TextEditor placeholder="Option 4" />
+                    <TextEditor
+                      placeholder="Option 4"
+                      onChange={onChange}
+                      value={value}
+                    />
                   )}
                 />
               </div>
@@ -215,20 +270,39 @@ const index = () => {
               required: "Required",
             }}
             render={({ field: { value, onChange } }) => (
-              <TextEditor placeholder="Reason" />
+              <TextEditor
+                placeholder="Reason"
+                onChange={onChange}
+                value={value}
+              />
             )}
           />
         </section>
       </form>
-      <section className="grid grid-cols-2">
+      <section className="grid grid-cols-2 gap-4">
         <section className="col-span-2">
-          <embed src="https://damipasal.s3.ap-south-1.amazonaws.com/1/LEGALDOCUMENTS/fb0f0350d7cd8427b05554ed5a67a541.pdf" />
+          <embed
+            src="https://damipasal.s3.ap-south-1.amazonaws.com/1/LEGALDOCUMENTS/fb0f0350d7cd8427b05554ed5a67a541.pdf"
+            className="h-full w-full"
+          />
         </section>
-        <section></section>
-        <section></section>
+        <section className=" bg-white">
+          <div className="flex justify-between p-5">
+            <div>Added Questions</div>
+            <div className="flex justify-center items-center">
+              <Search />
+            </div>
+          </div>
+        </section>
+        <section className=" bg-white">
+          <div className="flex justify-between p-5">
+            <div>Documents</div>
+            <div className="flex justify-center items-center">Documents</div>
+          </div>
+        </section>
       </section>
     </main>
   );
 };
 
-export default index;
+export default Index;

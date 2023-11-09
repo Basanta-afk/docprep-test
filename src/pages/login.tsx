@@ -1,7 +1,6 @@
 import { APILoginUser } from "@/apis/auth/auth";
 import CommonButton from "@/components/common/form/CommonButton";
 import CommonTextField from "@/components/common/form/CommonTextField";
-import SmeNavBar from "@/components/partials/SmeNavBar";
 import useIsAuth from "@/hooks/useIsAuth";
 import { authDTO } from "@/utils/formatters/authDTO";
 import notify from "@/utils/helpers/notify";
@@ -10,13 +9,6 @@ import { Checkbox } from "@mantine/core";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
-
-enum Users {
-  "ADMIN" = "ADMIN",
-  "BFI" = "BANK",
-  "BRANCH" = "BANK_BRANCH",
-  "SME" = "BUSINESS",
-}
 
 const Login = () => {
   const router = useRouter();
@@ -41,37 +33,11 @@ const Login = () => {
       setLoading(true);
       const formattedData = authDTO.login({ ...data, rememberMe: remember });
       const response: ILoginResponse = await APILoginUser(formattedData);
-      const responseData = response?.data;
+      router.push("/addQuestion");
+      const responseData = response?.user;
       localStorage.setItem("data", JSON.stringify(responseData));
       localStorage.setItem("token", response?.token);
-      localStorage.setItem("refreshToken", response?.refreshToken);
       notify("success", response?.message);
-      reset();
-
-      switch (responseData?.userType) {
-        case Users.ADMIN:
-          router.push("/admin");
-          break;
-        case Users.BFI:
-          if (responseData?.bfiStatus === "APPROVED" || responseData?.isFirstLogin === false) {
-            router.push("/bfi");
-          } else {
-            router.push("/bfi/bfi-details");
-          }
-          break;
-        case Users.BRANCH:
-          if (responseData?.hasUserChangedPassword) {
-            router.push("/bfi-branch");
-          } else {
-            router.push("/bfi-branch/set-password");
-          }
-          break;
-        case Users.SME:
-          router.push("/sme");
-          break;
-        default:
-          break;
-      }
     } catch (error: any) {
       setLoading(false);
       notify("error", error);
@@ -86,23 +52,29 @@ const Login = () => {
   }, [isAuth]);
 
   return (
-    <main className="w-full h-full flex justify-center items-center">
+    <main className="flex items-center justify-center h-[100vh] check">
       <div className="w-[450px] card-layout p-5 lg:p-10 bg-white space-y-6 ">
-        <h1 className="text-title-active font-medium text-2xl lg:text-3xl pb-5">Sign In</h1>
+        <h1 className="text-title-active font-medium text-2xl lg:text-3xl pb-5">
+          Login In
+        </h1>
         <span className="text-lg">Login to your existing account</span>
         <form className="pt-5 space-y-5" onSubmit={handleSubmit(onSubmit)}>
           <Controller
             name="email"
             rules={{
               required: "required",
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: "invalid email address",
-              },
+              // pattern: {
+              //   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              //   message: "invalid email address",
+              // },
             }}
             control={control}
             render={({ field }) => (
-              <CommonTextField {...field} placeholder="Email" error={errors.email?.message} />
+              <CommonTextField
+                {...field}
+                placeholder="Email"
+                error={errors.email?.message}
+              />
             )}
           />
           <Controller
@@ -131,9 +103,6 @@ const Login = () => {
               />
               Remember me
             </div>
-            {/* <div>
-              <Link href="">Forgot password</Link>
-            </div> */}
           </div>
 
           <div className="pt-10">
@@ -143,19 +112,13 @@ const Login = () => {
               size="xl"
               loading={loading}
             >
-              Sign in
+              Login
             </CommonButton>
           </div>
-          {/* <div className="flex w-full justify-end py-2">
-            <span>
-              Don&apos;t have an account? <Link href="/login">Sign Up</Link>
-            </span>
-          </div> */}
         </form>
       </div>
     </main>
   );
 };
 
-Login.Layout = SmeNavBar;
 export default Login;

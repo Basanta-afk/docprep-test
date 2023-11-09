@@ -6,7 +6,7 @@ import Superscript from "@tiptap/extension-superscript";
 import SubScript from "@tiptap/extension-subscript";
 import Placeholder from "@tiptap/extension-placeholder";
 
-const TextEditor = ({ placeholder }: any) => {
+const TextEditor = ({ placeholder, value, onChange }: any) => {
   const router = useRouter();
   1;
 
@@ -18,6 +18,11 @@ const TextEditor = ({ placeholder }: any) => {
       SubScript,
       Placeholder.configure({ placeholder: placeholder }),
     ],
+    content: value,
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      onChange(html);
+    },
   });
   return (
     <div>
