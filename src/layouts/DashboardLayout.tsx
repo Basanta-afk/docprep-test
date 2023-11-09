@@ -1,14 +1,26 @@
+import { APIGetAllExamBoards } from "@/apis/exam/examBoard";
 import CommonButton from "@/components/common/form/CommonButton";
 import Logo from "@/components/partials/Logo";
 import { tableRow } from "@/utils/constants/tabledata";
-import { AppShell, Button, Header, Modal, Navbar, Select, Tabs, TabsProps, rem } from "@mantine/core";
+import {
+  AppShell,
+  Button,
+  Header,
+  Modal,
+  Navbar,
+  Select,
+  Tabs,
+  TabsProps,
+  rem,
+} from "@mantine/core";
 import Link from "@tiptap/extension-link";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 const DashboardLayout = ({ children }: any) => {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [opened, setOpened] = useState(false);
   const [openSetBox, setOpenSetBox] = useState(false);
   const hours = ["1", "2", "3"];
@@ -30,14 +42,36 @@ const DashboardLayout = ({ children }: any) => {
     },
   });
 
+  const getExamBoard = async () => {
+    try {
+      const subjects = await APIGetAllExamBoards();
+      setLoading(false);
+      console.log({ subjects });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const onSubmit = async (data: any) => {
     console.log(data);
   };
+
+  useEffect(() => {
+    getExamBoard();
+  }, []);
+
   return (
     <AppShell
       header={
-        <Header height={70} p="md" className="flex items-center justify-between dynamic-x-padding">
-          <section className="hover:cursor-pointer" onClick={() => router.push("/")}>
+        <Header
+          height={70}
+          p="md"
+          className="flex items-center justify-between dynamic-x-padding"
+        >
+          <section
+            className="hover:cursor-pointer"
+            onClick={() => router.push("/")}
+          >
             {/* <Logo height={50} width={200} /> */}
             <Logo height={50} width={200} />
           </section>
@@ -61,7 +95,12 @@ const DashboardLayout = ({ children }: any) => {
         backgroundColor: "#EFF0F6",
       }}
     >
-      <Modal opened={openSetBox} onClose={() => setOpenSetBox(false)} title="Add set" size={750}>
+      <Modal
+        opened={openSetBox}
+        onClose={() => setOpenSetBox(false)}
+        title="Add set"
+        size={750}
+      >
         <div className="flex flex-col justify-start px-10 font-semibold">
           <Tabs
             defaultValue="old-questions"
@@ -69,7 +108,8 @@ const DashboardLayout = ({ children }: any) => {
             styles={(theme) => ({
               tab: {
                 // ...theme.fn.focusStyles(),
-                backgroundColor: theme.colorScheme === "dark" ? "" : theme.colors.white,
+                backgroundColor:
+                  theme.colorScheme === "dark" ? "" : theme.colors.white,
                 // color: theme.colorScheme === "dark" ? theme.colors.dark[0] : theme.colors.gray[9],
                 border: theme.colors.gray,
                 padding: `${theme.spacing.xs} ${theme.spacing.md}`,
@@ -100,7 +140,10 @@ const DashboardLayout = ({ children }: any) => {
               <Tabs.Tab value="old-questions" className="w-full font-semibold">
                 Old Questions
               </Tabs.Tab>
-              <Tabs.Tab value="chapter-wise-questions" className="w-full font-semibold">
+              <Tabs.Tab
+                value="chapter-wise-questions"
+                className="w-full font-semibold"
+              >
                 Chapter Wise Questions
               </Tabs.Tab>
             </Tabs.List>
