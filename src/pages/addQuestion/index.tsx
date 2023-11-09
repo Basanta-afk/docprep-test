@@ -281,7 +281,7 @@ const Index = () => {
       </form>
       <section className="grid grid-cols-2 gap-4">
         <section className="col-span-2">
-          <embed
+          <iframe
             src="https://damipasal.s3.ap-south-1.amazonaws.com/1/LEGALDOCUMENTS/fb0f0350d7cd8427b05554ed5a67a541.pdf"
             className="h-full w-full"
           />
