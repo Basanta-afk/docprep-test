@@ -4,7 +4,7 @@ import CommonSelect from "@/components/common/form/CommonSelect";
 import { questionsDTO } from "@/utils/formatters/questionsDTO";
 import showNotify from "@/utils/notify";
 import { Button, Group, Radio } from "@mantine/core";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Search } from "lucide-react";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -14,6 +14,7 @@ const Index = () => {
   console.log(correctOption);
 
   const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
 
   const router = useRouter();
 
@@ -278,12 +279,27 @@ const Index = () => {
           />
         </section>
       </form>
-      <section className="grid grid-cols-2">
+      <section className="grid grid-cols-2 gap-4">
         <section className="col-span-2">
-          <embed src="https://damipasal.s3.ap-south-1.amazonaws.com/1/LEGALDOCUMENTS/fb0f0350d7cd8427b05554ed5a67a541.pdf" />
+          <embed
+            src="https://damipasal.s3.ap-south-1.amazonaws.com/1/LEGALDOCUMENTS/fb0f0350d7cd8427b05554ed5a67a541.pdf"
+            className="h-full w-full"
+          />
         </section>
-        <section></section>
-        <section></section>
+        <section className=" bg-white">
+          <div className="flex justify-between p-5">
+            <div>Added Questions</div>
+            <div className="flex justify-center items-center">
+              <Search />
+            </div>
+          </div>
+        </section>
+        <section className=" bg-white">
+          <div className="flex justify-between p-5">
+            <div>Documents</div>
+            <div className="flex justify-center items-center">Documents</div>
+          </div>
+        </section>
       </section>
     </main>
   );
