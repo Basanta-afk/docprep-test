@@ -46,7 +46,6 @@ const DashboardLayout = ({ children }: any) => {
     try {
       const subjects = await APIGetAllExamBoards();
       setLoading(false);
-      console.log({ subjects });
     } catch (error) {
       console.log(error);
     }

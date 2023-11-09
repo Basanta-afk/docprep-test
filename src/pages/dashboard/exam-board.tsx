@@ -122,11 +122,9 @@ const ExamBoard = () => {
 
   const getSelectedExamSubject = async () => {
     try {
-      if (subjects) {
-        const res = await APIGetRelatedSubjects();
+      const res = await APIGetRelatedSubjects();
 
-        setSubjects(res);
-      }
+      setSubjects(res);
     } catch (error) {
       console.log(error);
     }
@@ -134,11 +132,9 @@ const ExamBoard = () => {
 
   const getSelectedSubjectChapter = async () => {
     try {
-      if (chapter) {
-        const res = await APIGetRelatedChapters(selectedSubject);
+      const res = await APIGetRelatedChapters(selectedSubject);
 
-        setChapter(res);
-      }
+      setChapter(res);
     } catch (error) {
       console.log(error);
     }
@@ -151,15 +147,21 @@ const ExamBoard = () => {
   }, [router.isReady]);
 
   useEffect(() => {
-    getSelectedExam();
+    if (selectedTab) {
+      getSelectedExam();
+    }
   }, [selectedTab]);
 
   useEffect(() => {
-    getSelectedExamSubject();
+    if (selectedExam) {
+      getSelectedExamSubject();
+    }
   }, [selectedExam]);
 
   useEffect(() => {
-    getSelectedSubjectChapter();
+    if (selectedSubject) {
+      getSelectedSubjectChapter();
+    }
   }, [selectedSubject]);
 
   return (
@@ -247,7 +249,7 @@ const ExamBoard = () => {
 
                   <Accordion.Panel>
                     <section className="flex justify-end p-3">
-                      {/* <form onSubmit={handleSubmit(onSubmitSubject)}>
+                      <form onSubmit={handleSubmit(onSubmitSubject)}>
                         <div className="flex gap-2">
                           <Controller
                             name="subject.name"
@@ -271,7 +273,7 @@ const ExamBoard = () => {
                           />
                           <CommonButton type="submit">Add Subject</CommonButton>
                         </div>
-                      </form> */}
+                      </form>
                     </section>
                     {subjects?.map((subject: any) => (
                       <Accordion
@@ -284,7 +286,7 @@ const ExamBoard = () => {
 
                           <Accordion.Panel className="px-5">
                             <section className="flex justify-end p-3">
-                              <form onSubmit={handleSubmit(onSubmitChapter)}>
+                              {/* <form onSubmit={handleSubmit(onSubmitChapter)}>
                                 <div className="flex gap-2">
                                   <Controller
                                     name="chapter.name"
@@ -310,7 +312,7 @@ const ExamBoard = () => {
                                     Add Chapters
                                   </CommonButton>
                                 </div>
-                              </form>
+                              </form> */}
                             </section>
                             {chapter?.map((val: any) => (
                               <div key={val?.id}>{val?.name}</div>
