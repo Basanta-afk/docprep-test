@@ -33,7 +33,7 @@ const Login = () => {
       setLoading(true);
       const formattedData = authDTO.login({ ...data, rememberMe: remember });
       const response: ILoginResponse = await APILoginUser(formattedData);
-      router.push("/addQuestion");
+      router.push("/dashboard");
       const responseData = response?.user;
       localStorage.setItem("data", JSON.stringify(responseData));
       localStorage.setItem("token", response?.token);
