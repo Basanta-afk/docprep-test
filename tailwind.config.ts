@@ -1,4 +1,4 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: [
@@ -16,6 +16,7 @@ const config: Config = {
         error: "#F1BB00",
         success: "#F1BB00",
         warning: "#F1BB00",
+        blue: "#164E99",
         "title-active": "#14142B",
         body: "#4E4B66",
         label: "#6E7191",
@@ -29,4 +30,4 @@ const config: Config = {
   },
   plugins: [],
 };
-export default config
+export default config;

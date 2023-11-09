@@ -15,9 +15,8 @@ const LandingLayout = ({ children }: { children: React.JSX.Element }) => {
       <Header height={70} p="md" className="flex items-center justify-between dynamic-x-padding">
         <section className="hover:cursor-pointer" onClick={() => router.push("/")}>
           {/* <Logo height={50} width={200} /> */}
-          Logo
+          <Logo height={50} width={200} />
         </section>
-      
       </Header>
 
       {children}
