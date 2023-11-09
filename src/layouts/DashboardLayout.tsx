@@ -85,9 +85,17 @@ const DashboardLayout = ({ children }: any) => {
           width={{ xs: "100vw", sm: 200, lg: 300 }}
           className={" transition-transform bg-opacity-96"}
         >
-          <h1 className="text-lg text-title-active mb-10 text-center">Home</h1>
+          <h1
+            className="text-lg text-title-active mb-10 text-center cursor-pointer"
+            onClick={() => router.push("/dashboard")}
+          >
+            Home
+          </h1>
           <div onClick={() => setOpenSetBox(!openSetBox)}>
             <CommonButton>Add set</CommonButton>
+          </div>
+          <div onClick={() => router.push("/dashboard/exam-board")}>
+            <CommonButton>Exam Board</CommonButton>
           </div>
         </Navbar>
       }

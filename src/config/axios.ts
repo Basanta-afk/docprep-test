@@ -1,9 +1,10 @@
 import { getToken } from "@/utils/helpers/localStorage";
 import axios from "axios";
 const axiosInstance: any = axios.create({
-  baseURL: "http://192.168.10.101:8080/api/v1",
-  // baseURL: process.env.NEXT_PUBLIC_BACKURL,
+  // baseURL: "http://192.168.10.101:8080/api/v1",
+  baseURL: "https://api-dev-docprep.ktmbees.com/api/v1",
 
+  // baseURL: process.env.NEXT_PUBLIC_BACKURL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -37,8 +38,8 @@ axiosInstance.interceptors.request.use(
 // Add a response interceptor
 axiosInstance.interceptors.response.use(
   function (response: any) {
-    console.log(response);
-    
+    console.log(response, "response");
+
     return response.data;
   },
   function (error: any) {
