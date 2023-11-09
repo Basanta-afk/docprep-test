@@ -39,5 +39,5 @@ export interface ILoginResponse {
   message: string;
   type: string;
   refreshToken: string;
-  data: ILoginResponseData;
+  user: ILoginResponseData;
 }
