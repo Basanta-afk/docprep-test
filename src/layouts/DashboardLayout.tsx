@@ -34,11 +34,12 @@ const DashboardLayout = ({ children }: any) => {
   const [subject, setSubject] = useState([]);
   const [chapter, setChapter] = useState([]);
   const [activeTab, setActiveTab] = useState("old-questions");
-  console.log({ activeTab });
 
   const handleTabChange = (value: any) => {
-    console.log("Changing tab to:", value);
     setActiveTab(value);
+    if (value === "chapter-wise-questions") {
+      router.push("/dashboard/addQuestion/0");
+    }
   };
 
   const YEARS = Array.from({ length: 31 }, (_, index) =>
@@ -99,19 +100,21 @@ const DashboardLayout = ({ children }: any) => {
 
   const selectedExamBoard = watch("boardQuestions.examBoard");
 
-  const selectedSubject = watch("chapterQuestions.subject");
+  // const selectedSubject = watch("chapterQuestions.subject");
 
   useEffect(() => {
     if (selectedExamBoard) {
+      setValue("boardQuestions.examId", "");
       getExamName(selectedExamBoard);
     }
   }, [selectedExamBoard]);
 
-  useEffect(() => {
-    if (selectedSubject) {
-      getChapterName(selectedSubject);
-    }
-  }, [selectedExamBoard]);
+  // useEffect(() => {
+  //   if (selectedSubject) {
+  //     setValue("chapterQuestions.chapter", "");
+  //     getChapterName(selectedSubject);
+  //   }
+  // }, [selectedSubject]);
 
   const getExamBoard = async () => {
     try {
@@ -128,20 +131,20 @@ const DashboardLayout = ({ children }: any) => {
     }
   };
 
-  const getSubject = async () => {
-    try {
-      const examSubjectData = await APIGetAllSubjects();
-      setSubject(examSubjectData);
+  // const getSubject = async () => {
+  //   try {
+  //     const examSubjectData = await APIGetAllSubjects();
+  //     setSubject(examSubjectData);
 
-      const firstExamSubjectId =
-        examSubjectData.length > 0 ? examSubjectData[0].id : "";
-      setValue("chapterQuestions.subject", firstExamSubjectId);
+  //     const firstExamSubjectId =
+  //       examSubjectData.length > 0 ? examSubjectData[0].id : "";
+  //     setValue("chapterQuestions.subject", firstExamSubjectId);
 
-      setLoading(false);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  //     setLoading(false);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   const getExamName = async (examBoardId: string) => {
     try {
@@ -153,24 +156,23 @@ const DashboardLayout = ({ children }: any) => {
     }
   };
 
-  const getChapterName = async (subjectId: string) => {
-    try {
-      const chapterNameData = await APIGetAllChapters(subjectId);
-      setChapter(chapterNameData);
-      setLoading(false);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const getChapterName = async (subjectId: string) => {
+  //   try {
+  //     const chapterNameData = await APIGetAllChapters(subjectId);
+  //     setChapter(chapterNameData);
+  //     setLoading(false);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   useEffect(() => {
     getExamBoard();
-    getSubject();
+    // getSubject();
   }, []);
 
   const onSubmit = async (data: any) => {
     if (activeTab === "old-questions") {
-      console.log(data?.boardQuestions);
       const formData = setsDTO.oldQuestions(data?.boardQuestions);
       const examId = data?.boardQuestions?.examId;
       console.log(examId);
@@ -180,6 +182,8 @@ const DashboardLayout = ({ children }: any) => {
         router.push(`/dashboard/addQuestion/${res?.id}`);
       }
     } else if (activeTab === "chapter-wise-questions") {
+      router.push("/dashboard/addQuestion/0");
+
       console.log(data?.chapterQuestions);
     }
   };
@@ -418,7 +422,7 @@ const DashboardLayout = ({ children }: any) => {
               )}
             </Tabs.Panel>
             <Tabs.Panel value="chapter-wise-questions">
-              {activeTab !== "old-questions" && (
+              {/* {activeTab !== "old-questions" && (
                 <form onSubmit={handleSubmit(onSubmit)}>
                   <div className="px-16 h-72">
                     <div className="flex justify-between mb-5 mt-6 gap-10">
@@ -469,7 +473,7 @@ const DashboardLayout = ({ children }: any) => {
                     <Button type="submit">Create Set</Button>
                   </div>
                 </form>
-              )}
+              )} */}
             </Tabs.Panel>
           </Tabs>
 
