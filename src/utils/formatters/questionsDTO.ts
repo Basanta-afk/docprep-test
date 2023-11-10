@@ -1,5 +1,5 @@
 export const questionsDTO = {
-  addQuestions: (data: any, correctOption: any) => {
+  addQuestions: (data: any, correctOption: any, setId: any) => {
     const options = Array.from({ length: 4 }, (_, i) => {
       const optionName = `option${i + 1}`;
       return {
@@ -15,9 +15,12 @@ export const questionsDTO = {
       chapter: {
         id: data.chapter,
       },
-      set: {
-        id: data.subject,
-      },
+      set:
+        setId != "0"
+          ? {
+              id: Number(setId),
+            }
+          : null,
       options: options,
     };
   },

@@ -88,7 +88,7 @@ const Index = () => {
       setLoading(true);
       console.log(data, correctOption);
 
-      const formData = questionsDTO.addQuestions(data, correctOption);
+      const formData = questionsDTO.addQuestions(data, correctOption, id);
       const res = await APIPostQuestions(formData);
       console.log(formData);
     } catch (error) {
