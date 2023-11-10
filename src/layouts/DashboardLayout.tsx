@@ -1,7 +1,12 @@
+import { APIGetAllChapters } from "@/apis/chapter/chapter";
+import { APICreateSets } from "@/apis/exam/createSet";
 import { APIGetAllExamBoards } from "@/apis/exam/examBoard";
+import { APIGetAllExamName } from "@/apis/exam/examName";
+import { APIGetAllSubjects } from "@/apis/subject/subject";
 import CommonButton from "@/components/common/form/CommonButton";
 import Logo from "@/components/partials/Logo";
 import { tableRow } from "@/utils/constants/tabledata";
+import { setsDTO } from "@/utils/formatters/setDTO";
 import {
   AppShell,
   Button,
@@ -23,41 +28,163 @@ const DashboardLayout = ({ children }: any) => {
   const [loading, setLoading] = useState(false);
   const [opened, setOpened] = useState(false);
   const [openSetBox, setOpenSetBox] = useState(false);
-  const hours = ["1", "2", "3"];
-  const minutes = ["1", "2", "3", "4"];
+  const [examBoard, setExamBoard] = useState([]);
+  const [examName, setExamName] = useState([]);
+
+  const [subject, setSubject] = useState([]);
+  const [chapter, setChapter] = useState([]);
+  const [activeTab, setActiveTab] = useState("old-questions");
+  console.log({ activeTab });
+
+  const handleTabChange = (value: any) => {
+    console.log("Changing tab to:", value);
+    setActiveTab(value);
+  };
+
+  const YEARS = Array.from({ length: 31 }, (_, index) =>
+    (2085 - index).toString()
+  );
+  const MONTHS = [
+    { value: "1", label: "Baisakh" },
+    { value: "2", label: "Jestha" },
+    { value: "3", label: "Ashadh" },
+    { value: "4", label: "Shrawan" },
+    { value: "5", label: "Bhadra" },
+    { value: "6", label: "Ashwin" },
+    { value: "7", label: "Kartik" },
+    { value: "8", label: "Mangsir" },
+    { value: "9", label: "Poush" },
+    { value: "10", label: "Magh" },
+    { value: "11", label: "Falgun" },
+    { value: "12", label: "Chaitra" },
+  ];
+  const hours = ["1", "2", "3", "4", "5"];
+  const minutes = [
+    "5",
+    "10",
+    "15",
+    "20",
+    "25",
+    "30",
+    "35",
+    "40",
+    "45",
+    "50",
+    "55",
+    "60",
+  ];
   const {
     handleSubmit,
     control,
+    setValue,
+    watch,
     formState: { errors },
-  } = useForm({
+  }: any = useForm<any>({
     defaultValues: {
-      examId: "",
-      examBoard: "",
-      year: "",
-      month: "",
-      hours: "",
-      minutes: "",
-      subject: "",
-      chapter: "",
+      boardQuestions: {
+        examId: "",
+        examBoard: "",
+        year: "",
+        month: "",
+        hours: "",
+        minutes: "",
+      },
+      chapterQuestions: {
+        subject: "",
+        chapter: "",
+      },
     },
+    mode: "onChange",
   });
+
+  const selectedExamBoard = watch("boardQuestions.examBoard");
+
+  const selectedSubject = watch("chapterQuestions.subject");
+
+  useEffect(() => {
+    if (selectedExamBoard) {
+      getExamName(selectedExamBoard);
+    }
+  }, [selectedExamBoard]);
+
+  useEffect(() => {
+    if (selectedSubject) {
+      getChapterName(selectedSubject);
+    }
+  }, [selectedExamBoard]);
 
   const getExamBoard = async () => {
     try {
-      const subjects = await APIGetAllExamBoards();
+      const examBoardData = await APIGetAllExamBoards();
+      setExamBoard(examBoardData);
+
+      const firstExamBoardId =
+        examBoardData.length > 0 ? examBoardData[0].id : "";
+      setValue("boardQuestions.examBoard", firstExamBoardId);
+
       setLoading(false);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const onSubmit = async (data: any) => {
-    console.log(data);
+  const getSubject = async () => {
+    try {
+      const examSubjectData = await APIGetAllSubjects();
+      setSubject(examSubjectData);
+
+      const firstExamSubjectId =
+        examSubjectData.length > 0 ? examSubjectData[0].id : "";
+      setValue("chapterQuestions.subject", firstExamSubjectId);
+
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getExamName = async (examBoardId: string) => {
+    try {
+      const examNameData = await APIGetAllExamName(examBoardId);
+      setExamName(examNameData);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getChapterName = async (subjectId: string) => {
+    try {
+      const chapterNameData = await APIGetAllChapters(subjectId);
+      setChapter(chapterNameData);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
     getExamBoard();
+    getSubject();
   }, []);
+
+  const onSubmit = async (data: any) => {
+    if (activeTab === "old-questions") {
+      console.log(data?.boardQuestions);
+      const formData = setsDTO.oldQuestions(data?.boardQuestions);
+      const examId = data?.boardQuestions?.examId;
+      console.log(examId);
+
+      const res = await APICreateSets(examId, formData);
+      if (res) {
+        router.push(`/dashboard/addQuestion/${res?.id}`);
+      }
+    } else if (activeTab === "chapter-wise-questions") {
+      console.log(data?.chapterQuestions);
+    }
+  };
+
+  console.log(errors);
 
   return (
     <AppShell
@@ -71,7 +198,6 @@ const DashboardLayout = ({ children }: any) => {
             className="hover:cursor-pointer"
             onClick={() => router.push("/")}
           >
-            {/* <Logo height={50} width={200} /> */}
             <Logo height={50} width={200} />
           </section>
         </Header>
@@ -110,7 +236,8 @@ const DashboardLayout = ({ children }: any) => {
       >
         <div className="flex flex-col justify-start px-10 font-semibold">
           <Tabs
-            defaultValue="old-questions"
+            value={activeTab}
+            onTabChange={(v) => handleTabChange(v)}
             unstyled
             styles={(theme) => ({
               tab: {
@@ -155,174 +282,194 @@ const DashboardLayout = ({ children }: any) => {
               </Tabs.Tab>
             </Tabs.List>
             <Tabs.Panel value="old-questions">
-              <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="px-16 h-72">
-                  <div className="flex justify-between mb-5 mt-6 gap-10">
-                    <label className="w-[20%] text-base">Exam Board</label>
-                    <Controller
-                      name="examBoard"
-                      control={control}
-                      rules={{ required: "required" }}
-                      defaultValue=""
-                      render={({ field: { onChange, value } }) => (
-                        <Select
-                          onChange={onChange}
-                          value={value}
-                          data={hours}
-                          placeholder="IOM, MOE, KUET"
-                          className="w-[80%]"
-                          error={errors?.examBoard?.message}
-                        />
-                      )}
-                    />
-                  </div>
-                  <div className="flex justify-between mb-5 mt-6 gap-10">
-                    <label className="w-[20%] text-base">Exam Id</label>
-                    <Controller
-                      name="examId"
-                      control={control}
-                      rules={{ required: "required" }}
-                      defaultValue=""
-                      render={({ field: { onChange, value } }) => (
-                        <Select
-                          onChange={onChange}
-                          value={value}
-                          data={hours}
-                          placeholder="Entrance, First Term, Mid Term, Final"
-                          className="w-[80%]"
-                          error={errors?.examId?.message}
-                        />
-                      )}
-                    />
-                  </div>
-                  <div className="flex justify-between mb-5 mt-6 gap-10">
-                    <label className="w-[20%] text-base">Exam Period</label>
-                    <div className="w-[80%] flex gap-3">
+              {activeTab !== "chapter-wise-questions" && (
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  <div className="px-16 h-72">
+                    <div className="flex justify-between mb-5 mt-6 gap-10">
+                      <label className="w-[20%] text-base">Exam Board</label>
                       <Controller
-                        name="year"
+                        name="boardQuestions.examBoard"
                         control={control}
                         rules={{ required: "required" }}
                         defaultValue=""
-                        render={({ field: { onChange, value } }) => (
+                        render={({ field }: any) => (
                           <Select
-                            onChange={onChange}
-                            value={value}
-                            data={hours}
-                            placeholder="Year"
+                            {...field}
+                            data={examBoard?.map((option: any) => ({
+                              value: option.id,
+                              label: option.name,
+                            }))}
+                            placeholder="IOM, MOE, KUET"
                             className="w-[80%]"
-                            error={errors?.year?.message}
-                          />
-                        )}
-                      />
-                      <Controller
-                        name="month"
-                        control={control}
-                        rules={{ required: "required" }}
-                        defaultValue=""
-                        render={({ field: { onChange, value } }) => (
-                          <Select
-                            onChange={onChange}
-                            value={value}
-                            data={hours}
-                            placeholder="Month"
-                            className="w-[80%]"
-                            error={errors?.month?.message}
+                            error={errors?.boardQuestions?.examBoard?.message}
                           />
                         )}
                       />
                     </div>
-                  </div>
-                  <div className="flex justify-between mb-5 gap-10">
-                    <label className="w-[20%] text-base">Time</label>
-                    <div className="w-[80%] flex gap-3">
+                    <div className="flex justify-between mb-5 mt-6 gap-10">
+                      <label className="w-[20%] text-base">Exam Name</label>
                       <Controller
-                        name="hours"
+                        name="boardQuestions.examId"
                         control={control}
                         rules={{ required: "required" }}
                         defaultValue=""
-                        render={({ field: { onChange, value } }) => (
+                        render={({ field }: any) => (
                           <Select
-                            onChange={onChange}
-                            value={value}
-                            data={hours}
-                            placeholder="Hours"
+                            {...field}
+                            data={examName?.map((option: any) => ({
+                              value: option.id,
+                              label: option.name,
+                            }))}
+                            placeholder="Entrance, First Term, Mid Term, Final"
                             className="w-[80%]"
-                            error={errors?.hours?.message}
-                          />
-                        )}
-                      />
-                      <Controller
-                        name="minutes"
-                        control={control}
-                        rules={{ required: "required" }}
-                        defaultValue=""
-                        render={({ field: { onChange, value } }) => (
-                          <Select
-                            onChange={onChange}
-                            value={value}
-                            data={minutes}
-                            placeholder="Minutes"
-                            className="w-[80%]"
-                            error={errors?.minutes?.message}
+                            error={errors?.boardQuestions?.examId?.message}
                           />
                         )}
                       />
                     </div>
+                    <div className="flex justify-between mb-5 mt-6 gap-10">
+                      <label className="w-[20%] text-base">Exam Period</label>
+                      <div className="w-[80%] flex gap-3">
+                        <Controller
+                          name="boardQuestions.year"
+                          control={control}
+                          rules={{ required: "required" }}
+                          defaultValue=""
+                          render={({ field }) => (
+                            <Select
+                              {...field}
+                              data={YEARS}
+                              placeholder="Year"
+                              className="w-[80%]"
+                              searchable
+                              nothingFound="No options"
+                              maxDropdownHeight={150}
+                              error={errors?.boardQuestions?.year?.message}
+                            />
+                          )}
+                        />
+                        <Controller
+                          name="boardQuestions.month"
+                          control={control}
+                          rules={{ required: "required" }}
+                          defaultValue=""
+                          render={({ field }) => (
+                            <Select
+                              {...field}
+                              data={MONTHS}
+                              placeholder="Month"
+                              className="w-[80%]"
+                              searchable
+                              nothingFound="No options"
+                              maxDropdownHeight={150}
+                              error={errors?.boardQuestions?.month?.message}
+                            />
+                          )}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-between mb-5 gap-10">
+                      <label className="w-[20%] text-base">Time</label>
+                      <div className="w-[80%] flex gap-3">
+                        <Controller
+                          name="boardQuestions.hours"
+                          control={control}
+                          rules={{ required: "required" }}
+                          defaultValue=""
+                          render={({ field }) => (
+                            <Select
+                              {...field}
+                              data={hours}
+                              placeholder="Hours"
+                              className="w-[80%]"
+                              searchable
+                              nothingFound="No options"
+                              maxDropdownHeight={150}
+                              error={errors?.boardQuestions?.hours?.message}
+                            />
+                          )}
+                        />
+                        <Controller
+                          name="boardQuestions.minutes"
+                          control={control}
+                          rules={{ required: "required" }}
+                          defaultValue=""
+                          render={({ field }) => (
+                            <Select
+                              {...field}
+                              data={minutes}
+                              placeholder="Minutes"
+                              className="w-[80%]"
+                              searchable
+                              nothingFound="No options"
+                              maxDropdownHeight={150}
+                              error={errors?.boardQuestions?.minutes?.message}
+                            />
+                          )}
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="px-16 flex justify-end gap-10">
-                  <Button type="reset">Cancel</Button>
-                  <Button type="submit">Create Set</Button>
-                </div>
-              </form>
+                  <div className="px-16 flex justify-end gap-10">
+                    <Button type="reset">Cancel</Button>
+                    <Button type="submit">Create Set</Button>
+                  </div>
+                </form>
+              )}
             </Tabs.Panel>
             <Tabs.Panel value="chapter-wise-questions">
-              <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="px-16 h-72">
-                  <div className="flex justify-between mb-5 mt-6 gap-10">
-                    <label className="w-[20%] text-base">Subject</label>
-                    <Controller
-                      name="subject"
-                      control={control}
-                      rules={{ required: "required" }}
-                      defaultValue=""
-                      render={({ field: { onChange, value } }) => (
-                        <Select
-                          onChange={onChange}
-                          value={value}
-                          data={hours}
-                          placeholder="Physics, Chemistry , Botany"
-                          className="w-[80%]"
-                          error={errors?.subject?.message}
-                        />
-                      )}
-                    />
+              {activeTab !== "old-questions" && (
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  <div className="px-16 h-72">
+                    <div className="flex justify-between mb-5 mt-6 gap-10">
+                      <label className="w-[20%] text-base">Subject</label>
+                      <Controller
+                        name="chapterQuestions.subject"
+                        control={control}
+                        rules={{ required: "required" }}
+                        defaultValue=""
+                        render={({ field }) => (
+                          <Select
+                            {...field}
+                            data={subject?.map((option: any) => ({
+                              value: option.id,
+                              label: option.name,
+                            }))}
+                            placeholder="Physics, Chemistry , Botany"
+                            className="w-[80%]"
+                            error={errors?.chapterQuestions?.subject?.message}
+                          />
+                        )}
+                      />
+                    </div>
+                    <div className="flex justify-between mb-5 mt-6 gap-10">
+                      <label className="w-[20%] text-base">Chapter</label>
+                      <Controller
+                        name="chapterQuestions.chapter"
+                        control={control}
+                        rules={{ required: "required" }}
+                        defaultValue=""
+                        render={({ field }) => (
+                          <Select
+                            {...field}
+                            data={chapter?.map((option: any) => ({
+                              value: option.id,
+                              label: option.name,
+                            }))}
+                            placeholder="Mechanics, Modern Physics, ..."
+                            className="w-[80%]"
+                            error={errors?.chapterQuestions?.chapter?.message}
+                          />
+                        )}
+                      />
+                    </div>
                   </div>
-                  <div className="flex justify-between mb-5 mt-6 gap-10">
-                    <label className="w-[20%] text-base">Chapter</label>
-                    <Controller
-                      name="chapter"
-                      control={control}
-                      rules={{ required: "required" }}
-                      defaultValue=""
-                      render={({ field: { onChange, value } }) => (
-                        <Select
-                          onChange={onChange}
-                          value={value}
-                          data={hours}
-                          placeholder="Mechanics, Modern Physics, ..."
-                          className="w-[80%]"
-                          error={errors?.chapter?.message}
-                        />
-                      )}
-                    />
+                  <div className="px-16 flex justify-end gap-10">
+                    <Button type="reset">Cancel</Button>
+                    <Button type="submit">Create Set</Button>
                   </div>
-                </div>
-                <div className="px-16 flex justify-end gap-10">
-                  <Button type="reset">Cancel</Button>
-                  <Button type="submit">Create Set</Button>
-                </div>
-              </form>
+                </form>
+              )}
             </Tabs.Panel>
           </Tabs>
 

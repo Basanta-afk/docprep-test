@@ -1,5 +1,6 @@
 import { getToken } from "@/utils/helpers/localStorage";
 import axios from "axios";
+import { useRouter } from "next/router";
 const axiosInstance: any = axios.create({
   // baseURL: "http://192.168.10.101:8080/api/v1",
   baseURL: "https://api-dev-docprep.ktmbees.com/api/v1",
@@ -50,7 +51,10 @@ axiosInstance.interceptors.response.use(
     }
 
     if (error.response && error.response.status === 403) {
+      const router = useRouter();
       // store.dispatch(errorNotify('not authorized'))
+      localStorage.clear();
+      router.push("/login");
     }
 
     return Promise.reject(error?.response?.data?.message);

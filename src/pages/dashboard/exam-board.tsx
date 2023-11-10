@@ -33,6 +33,7 @@ const ExamBoard = () => {
     handleSubmit,
     control,
     reset,
+    getValues,
     setValue,
     formState: { errors },
   }: any = useForm<any>({
@@ -54,23 +55,31 @@ const ExamBoard = () => {
   });
   const onSubmitExamBoard = async (values: any) => {
     try {
-      await APIAddExamBoard(values?.examBoard);
+      if (values?.examBoard?.name) {
+        await APIAddExamBoard(values?.examBoard);
 
-      setValue("examBoard.name", "");
+        setValue("examBoard.name", "");
 
-      getAllBoardData();
-      showNotify("success", "Board Added Successfully");
+        getAllBoardData();
+        showNotify("success", "Board Added Successfully");
+      } else {
+        showNotify("error", "Enter ExamBoard Name");
+      }
     } catch (error) {
       console.log(error);
     }
   };
   const onSubmitExam = async (values: any) => {
     try {
-      await APIAddExam(selectedTab, values?.exam);
+      if (values?.exam?.name) {
+        await APIAddExam(selectedTab, values?.exam);
 
-      setValue("exam.name", "");
-      getSelectedExam();
-      showNotify("success", "Exam Added Successfully");
+        setValue("exam.name", "");
+        getSelectedExam();
+        showNotify("success", "Exam Added Successfully");
+      } else {
+        showNotify("error", "Enter Exam Name");
+      }
     } catch (error) {
       console.log(error);
     }
@@ -78,11 +87,15 @@ const ExamBoard = () => {
 
   const onSubmitSubject = async (values: any) => {
     try {
-      await APIAddSubject(values?.subject);
+      if (values?.subject?.name) {
+        await APIAddSubject(values?.subject);
 
-      setValue("subject.name", "");
-      getSelectedExamSubject();
-      showNotify("success", "Subject Added Successfully");
+        setValue("subject.name", "");
+        getSelectedExamSubject();
+        showNotify("success", "Subject Added Successfully");
+      } else {
+        showNotify("error", "Enter Subject Name");
+      }
     } catch (error) {
       console.log(error);
     }
@@ -90,11 +103,15 @@ const ExamBoard = () => {
 
   const onSubmitChapter = async (values: any) => {
     try {
-      await APIAddChapters(selectedSubject, values?.chapter);
+      if (values?.chapter?.name) {
+        await APIAddChapters(selectedSubject, values?.chapter);
 
-      setValue("chapter.name", "");
-      getSelectedSubjectChapter();
-      showNotify("success", "Chapter Added Successfully");
+        setValue("chapter.name", "");
+        getSelectedSubjectChapter();
+        showNotify("success", "Chapter Added Successfully");
+      } else {
+        showNotify("error", "Enter Chapter Name");
+      }
     } catch (error) {
       console.log(error);
     }
@@ -169,17 +186,17 @@ const ExamBoard = () => {
       <section className="flex justify-between">
         <p>Exam Board</p>
 
-        {/* <form onSubmit={handleSubmit(onSubmitExamBoard)}>
+        <form onSubmit={handleSubmit(onSubmitExamBoard)}>
           <div className="flex gap-2">
             <Controller
               name="examBoard.name"
-              rules={{
-                required: "Board name is required",
-                // pattern: {
-                //   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                //   message: "invalid email address",
-                // },
-              }}
+              // rules={{
+              //   required: "Board name is required",
+              //   // pattern: {
+              //   //   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              //   //   message: "invalid email address",
+              //   // },
+              // }}
               control={control}
               render={({ field }: any) => (
                 <CommonTextField
@@ -193,7 +210,7 @@ const ExamBoard = () => {
             />
             <CommonButton type="submit">Add Board</CommonButton>
           </div>
-        </form> */}
+        </form>
       </section>
       <section>
         <Tabs
@@ -212,17 +229,17 @@ const ExamBoard = () => {
         {exams && (
           <>
             <section className="flex justify-end p-3">
-              {/* <form onSubmit={handleSubmit(onSubmitExam)}>
+              <form onSubmit={handleSubmit(onSubmitExam)}>
                 <div className="flex gap-2">
                   <Controller
                     name="exam.name"
-                    rules={{
-                      required: "Exam name is required",
-                      // pattern: {
-                      //   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      //   message: "invalid email address",
-                      // },
-                    }}
+                    // rules={{
+                    //   required: "Exam name is required",
+                    //   // pattern: {
+                    //   //   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    //   //   message: "invalid email address",
+                    //   // },
+                    // }}
                     control={control}
                     render={({ field }: any) => (
                       <CommonTextField
@@ -236,7 +253,7 @@ const ExamBoard = () => {
                   />
                   <CommonButton type="submit">Add Exam</CommonButton>
                 </div>
-              </form> */}
+              </form>
             </section>
             {exams?.map((val: any) => (
               <Accordion
@@ -253,13 +270,13 @@ const ExamBoard = () => {
                         <div className="flex gap-2">
                           <Controller
                             name="subject.name"
-                            rules={{
-                              required: "Subject name is required",
-                              // pattern: {
-                              //   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                              //   message: "invalid email address",
-                              // },
-                            }}
+                            // rules={{
+                            //   required: "Subject name is required",
+                            //   // pattern: {
+                            //   //   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                            //   //   message: "invalid email address",
+                            //   // },
+                            // }}
                             control={control}
                             render={({ field }: any) => (
                               <CommonTextField
@@ -286,17 +303,17 @@ const ExamBoard = () => {
 
                           <Accordion.Panel className="px-5">
                             <section className="flex justify-end p-3">
-                              {/* <form onSubmit={handleSubmit(onSubmitChapter)}>
+                              <form onSubmit={handleSubmit(onSubmitChapter)}>
                                 <div className="flex gap-2">
                                   <Controller
                                     name="chapter.name"
-                                    rules={{
-                                      required: "Chapter name is required",
-                                      // pattern: {
-                                      //   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                      //   message: "invalid email address",
-                                      // },
-                                    }}
+                                    // rules={{
+                                    //   required: "Chapter name is required",
+                                    //   // pattern: {
+                                    //   //   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                    //   //   message: "invalid email address",
+                                    //   // },
+                                    // }}
                                     control={control}
                                     render={({ field }: any) => (
                                       <CommonTextField
@@ -312,7 +329,7 @@ const ExamBoard = () => {
                                     Add Chapters
                                   </CommonButton>
                                 </div>
-                              </form> */}
+                              </form>
                             </section>
                             {chapter?.map((val: any) => (
                               <div key={val?.id}>{val?.name}</div>

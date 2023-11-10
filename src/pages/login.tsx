@@ -45,11 +45,11 @@ const Login = () => {
     }
   };
 
-  useEffect(() => {
-    if (isAuth) {
-      router.back();
-    }
-  }, [isAuth]);
+  // useEffect(() => {
+  //   if (isAuth) {
+  //     router.back();
+  //   }
+  // }, [isAuth]);
 
   return (
     <main className="flex items-center justify-center h-[100vh] check">
