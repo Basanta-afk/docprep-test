@@ -1,3 +1,5 @@
+import { APIGetAllChapters } from "@/apis/chapter/chapter";
+import { APIPostQuestions } from "@/apis/questions/question";
 import { APIGetAllSubjects } from "@/apis/subject/subject";
 import TextEditor from "@/components/common/TextEditor";
 import CommonSelect from "@/components/common/form/CommonSelect";
@@ -11,12 +13,18 @@ import { Controller, useForm } from "react-hook-form";
 
 const Index = () => {
   const [correctOption, setCorrectOption] = useState("option1");
-  console.log(correctOption);
 
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-
+  const [subject, setSubject] = useState([]);
+  const [chapter, setChapter] = useState([]);
   const router = useRouter();
+  const { query } = router;
+  const id = query?.setId ? query.setId[0] : null;
+
+  useEffect(() => {
+    console.log(id);
+  }, [id]);
 
   const {
     control,
@@ -41,15 +49,39 @@ const Index = () => {
     mode: "onChange",
   });
 
+  const selectedSubject = watch("subject");
+
   const getSubjects = async () => {
     try {
-      const subjects = await APIGetAllSubjects();
+      const examSubjectData = await APIGetAllSubjects();
+      setSubject(examSubjectData);
+
+      const firstExamSubjectId =
+        examSubjectData.length > 0 ? examSubjectData[0].id : "";
+      setValue("chapterQuestions.subject", firstExamSubjectId);
+
       setLoading(false);
-      console.log({ subjects });
     } catch (error) {
       console.log(error);
     }
   };
+
+  const getChapterName = async (subjectId: string) => {
+    try {
+      const chapterNameData = await APIGetAllChapters(subjectId);
+      setChapter(chapterNameData);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedSubject) {
+      setValue("chapter", "");
+      getChapterName(selectedSubject);
+    }
+  }, [selectedSubject]);
 
   const onSubmit = async (data: any) => {
     try {
@@ -57,7 +89,7 @@ const Index = () => {
       console.log(data, correctOption);
 
       const formData = questionsDTO.addQuestions(data, correctOption);
-
+      const res = await APIPostQuestions(formData);
       console.log(formData);
     } catch (error) {
       setLoading(false);
@@ -91,12 +123,11 @@ const Index = () => {
               rules={{
                 required: "Required",
               }}
-              render={({ field: { value, onChange } }) => (
+              render={({ field }: any) => (
                 <CommonSelect
                   placeholder="Question type"
-                  data={["Old", "New"]}
-                  onChange={onChange}
-                  value={value}
+                  data={["OLD", "NEW"]}
+                  {...field}
                 />
               )}
             />
@@ -109,12 +140,14 @@ const Index = () => {
               rules={{
                 required: "Required",
               }}
-              render={({ field: { value, onChange } }) => (
+              render={({ field }: any) => (
                 <CommonSelect
                   placeholder="Subject"
-                  data={["React", "Angular", "Vue", "Svelte"]}
-                  onChange={onChange}
-                  value={value}
+                  data={subject?.map((option: any) => ({
+                    value: option.id,
+                    label: option.name,
+                  }))}
+                  {...field}
                 />
               )}
             />
@@ -127,12 +160,14 @@ const Index = () => {
               rules={{
                 required: "Required",
               }}
-              render={({ field: { value, onChange } }) => (
+              render={({ field }: any) => (
                 <CommonSelect
                   placeholder="Chapter"
-                  data={["React", "Angular", "Vue", "Svelte"]}
-                  onChange={onChange}
-                  value={value}
+                  data={chapter?.map((option: any) => ({
+                    value: option.id,
+                    label: option.name,
+                  }))}
+                  {...field}
                 />
               )}
             />
