@@ -1,7 +1,7 @@
-import { APIRegisterUser } from "@/apis/auth/auth";
+// import { APIRegisterUser } from "@/apis/auth/auth";
 import CommonButton from "@/components/common/form/CommonButton";
 import CommonTextField from "@/components/common/form/CommonTextField";
-import SmeNavBar from "@/components/partials/SmeNavBar";
+// import SmeNavBar from "@/components/partials/SmeNavBar";
 import { UserType } from "@/utils/enums/userType";
 import { authDTO } from "@/utils/formatters/authDTO";
 import notify from "@/utils/helpers/notify";
@@ -33,9 +33,10 @@ const Signup = () => {
   const onSubmit: SubmitHandler<ISignUpData> = async (data) => {
     try {
       const formattedData = authDTO.signup(data, UserType.BUSINESS);
-      const response = await APIRegisterUser(formattedData);
+      const response: any = formattedData;
+      // const response = await APIRegisterUser(formattedData);
       reset();
-      notify("success", response?.message);
+      notify("success", response);
       await router.push("/login");
     } catch (error: any) {
       notify("error", error);
@@ -46,7 +47,9 @@ const Signup = () => {
   return (
     <main className="w-full h-full flex justify-center items-center">
       <div className="w-[450px] card-layout p-5 lg:p-10 bg-white space-y-5 ">
-        <h1 className="text-title-active font-medium text-2xl sm:text-3xl pb-5">Register</h1>
+        <h1 className="text-title-active font-medium text-2xl sm:text-3xl pb-5">
+          Register
+        </h1>
         <span className="text-lg lg:text-xl">Create New Account</span>
         <form className="pt-5 space-y-5" onSubmit={handleSubmit(onSubmit)}>
           <Controller
@@ -84,7 +87,10 @@ const Signup = () => {
             name="password"
             rules={{
               required: "required",
-              minLength: { value: 8, message: "password must be at least 8 characters long" },
+              minLength: {
+                value: 8,
+                message: "password must be at least 8 characters long",
+              },
               pattern: {
                 value: /^(?=.*[A-Z])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,}$/,
                 message:
@@ -105,7 +111,8 @@ const Signup = () => {
             name="confirmPassword"
             rules={{
               required: "required",
-              validate: (value) => value === password || "password do not match",
+              validate: (value) =>
+                value === password || "password do not match",
             }}
             control={control}
             render={({ field }) => (
@@ -138,5 +145,5 @@ const Signup = () => {
   );
 };
 
-Signup.Layout = SmeNavBar;
+// Signup.Layout = SmeNavBar;
 export default Signup;

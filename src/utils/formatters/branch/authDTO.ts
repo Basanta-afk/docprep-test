@@ -1,4 +1,4 @@
-import { BranchSetPasswordType } from "@/pages/bfi-branch/set-password";
+// import { BranchSetPasswordType } from "@/pages/bfi-branch/set-password";
 import { IBranchLoginData } from "@/utils/interface/branch/auth";
 
 export const branchAuthDto = {
@@ -9,7 +9,7 @@ export const branchAuthDto = {
       rememberMe: data?.rememberMe || false,
     };
   },
-  updatePassword: (data: BranchSetPasswordType,userId:string) => {
+  updatePassword: (data: any, userId: string) => {
     return {
       userId: userId,
       oldPassword: data?.oldPassword,
