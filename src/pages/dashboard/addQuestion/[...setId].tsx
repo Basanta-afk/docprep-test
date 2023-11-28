@@ -354,9 +354,10 @@ const Index = () => {
           </div>
           <ol className="pl-9">
             {fileList &&
-              fileList?.map((items: any) => {
+              fileList?.map((items: any, index: number) => {
                 return (
                   <li
+                    key={index}
                     className="border-black-500 py-2 cursor-pointer"
                     onClick={() => {
                       setUrl(items?.fileUrl);
