@@ -4,13 +4,16 @@ import { APIGetAllSubjects } from "@/apis/subject/subject";
 import TextEditor from "@/components/common/TextEditor";
 import CommonSelect from "@/components/common/form/CommonSelect";
 import { questionsDTO } from "@/utils/formatters/questionsDTO";
+import notify from "@/utils/helpers/notify";
 import showNotify from "@/utils/notify";
 import { Button, Group, Radio } from "@mantine/core";
-import { AlertCircle, Search } from "lucide-react";
+import { AlertCircle, CloudFog, Search } from "lucide-react";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-
+import { storage } from "@/config/firebase";
+import { getDownloadURL, listAll, ref, uploadBytes } from "firebase/storage";
+import { v4 } from "uuid";
 const Index = () => {
   const [correctOption, setCorrectOption] = useState("option1");
 
@@ -21,7 +24,12 @@ const Index = () => {
   const router = useRouter();
   const { query } = router;
   const id = query?.setId ? query.setId[0] : null;
-
+  const inputFile: any = useRef(null);
+  const [selectedFile, setSelectedFile] = useState<any>(null);
+  const fileListRef = ref(storage, "pdf/");
+  const [fileList, setFileList] = useState<any>([]);
+  const [url, setUrl] = useState(null);
+  const [state, setState] = useState(true);
   useEffect(() => {
     console.log(id);
   }, [id]);
@@ -56,13 +64,11 @@ const Index = () => {
       const examSubjectData = await APIGetAllSubjects();
       setSubject(examSubjectData);
 
-      const firstExamSubjectId =
-        examSubjectData.length > 0 ? examSubjectData[0].id : "";
+      const firstExamSubjectId = examSubjectData.length > 0 ? examSubjectData[0].id : "";
       setValue("chapterQuestions.subject", firstExamSubjectId);
-
       setLoading(false);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -101,13 +107,61 @@ const Index = () => {
     getSubjects();
   }, []);
 
+  const handleAndUploadFile = async (event: any) => {
+    const file = event.target.files[0];
+    setSelectedFile(file);
+    try {
+      if (file && file.type === "application/pdf") {
+        console.log(file);
+        const fileRef = ref(storage, `pdf/${file.name + v4()}`);
+        await uploadBytes(fileRef, file).then((data: any) => {
+          showNotify("success", "Pdf uploaded successfully");
+          setState((prev) => !prev);
+        });
+        // window.location.reload();
+      } else {
+        notify("error", "Please upload the pdf file only");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const onButtonClick = () => {
+    if (inputFile?.current) {
+      inputFile?.current?.click();
+    }
+  };
+  useEffect(() => {
+    let file: any = [];
+    listAll(fileListRef)
+      .then((response: any) => {
+        const promises = response?.items?.map((item: any) => {
+          const fileName = item?.name.split(".pdf")[0];
+          return getDownloadURL(item).then((fileUrl: any) => {
+            return { fileUrl, fileName };
+          });
+        });
+
+        return Promise.all(promises);
+      })
+      .then((nameAndURL) => {
+        if (url == null) {
+          setUrl(nameAndURL[0].fileUrl);
+        }
+        file.push(nameAndURL);
+        // Now you can set the state or perform other actions with nameAndURL
+        setFileList(nameAndURL);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }, [state]);
+
   return (
     <main className="grid grid-cols-2 gap-4 bg-[#EFF0F6] p-5 h-[100vh]">
       <form className=" bg-white  p-3" onSubmit={handleSubmit(onSubmit)}>
         <section className="flex justify-between pt-2">
-          <div className="flex justify-center items-center px-2">
-            Add Question
-          </div>
+          <div className="flex justify-center items-center px-2">Add Question</div>
           <div>
             <Button className="bg-[#164E99]" type="submit">
               Add Question
@@ -123,13 +177,7 @@ const Index = () => {
               rules={{
                 required: "Required",
               }}
-              render={({ field }: any) => (
-                <CommonSelect
-                  placeholder="Question type"
-                  data={["OLD", "NEW"]}
-                  {...field}
-                />
-              )}
+              render={({ field }: any) => <CommonSelect placeholder="Question type" data={["OLD", "NEW"]} {...field} />}
             />
           </div>
           <div>
@@ -182,11 +230,7 @@ const Index = () => {
               required: "Required",
             }}
             render={({ field: { value, onChange } }) => (
-              <TextEditor
-                placeholder="Question"
-                onChange={onChange}
-                value={value}
-              />
+              <TextEditor placeholder="Question" onChange={onChange} value={value} />
             )}
           />
         </section>
@@ -200,11 +244,7 @@ const Index = () => {
           </div>
         </div>
 
-        <Radio.Group
-          className="pt-3"
-          value={correctOption}
-          onChange={setCorrectOption}
-        >
+        <Radio.Group className="pt-3" value={correctOption} onChange={setCorrectOption}>
           <Group className="grid grid-cols-2">
             <div className="flex w-full">
               <div className="px-2">
@@ -219,11 +259,7 @@ const Index = () => {
                     required: "Required",
                   }}
                   render={({ field: { value, onChange } }) => (
-                    <TextEditor
-                      placeholder="Option 1"
-                      onChange={onChange}
-                      value={value}
-                    />
+                    <TextEditor placeholder="Option 1" onChange={onChange} value={value} />
                   )}
                 />
               </div>
@@ -241,11 +277,7 @@ const Index = () => {
                     required: "Required",
                   }}
                   render={({ field: { value, onChange } }) => (
-                    <TextEditor
-                      placeholder="Option 2"
-                      onChange={onChange}
-                      value={value}
-                    />
+                    <TextEditor placeholder="Option 2" onChange={onChange} value={value} />
                   )}
                 />
               </div>
@@ -263,11 +295,7 @@ const Index = () => {
                     required: "Required",
                   }}
                   render={({ field: { value, onChange } }) => (
-                    <TextEditor
-                      placeholder="Option 3"
-                      onChange={onChange}
-                      value={value}
-                    />
+                    <TextEditor placeholder="Option 3" onChange={onChange} value={value} />
                   )}
                 />
               </div>
@@ -285,11 +313,7 @@ const Index = () => {
                     required: "Required",
                   }}
                   render={({ field: { value, onChange } }) => (
-                    <TextEditor
-                      placeholder="Option 4"
-                      onChange={onChange}
-                      value={value}
-                    />
+                    <TextEditor placeholder="Option 4" onChange={onChange} value={value} />
                   )}
                 />
               </div>
@@ -305,22 +329,13 @@ const Index = () => {
               required: "Required",
             }}
             render={({ field: { value, onChange } }) => (
-              <TextEditor
-                placeholder="Reason"
-                onChange={onChange}
-                value={value}
-              />
+              <TextEditor placeholder="Reason" onChange={onChange} value={value} />
             )}
           />
         </section>
       </form>
       <section className="grid grid-cols-2 gap-4">
-        <section className="col-span-2">
-          <iframe
-            src="https://damipasal.s3.ap-south-1.amazonaws.com/1/LEGALDOCUMENTS/fb0f0350d7cd8427b05554ed5a67a541.pdf"
-            className="h-full w-full"
-          />
-        </section>
+        <section className="col-span-2">{url && <iframe src={url} className="h-full w-full" />}</section>
         <section className=" bg-white">
           <div className="flex justify-between p-5">
             <div>Added Questions</div>
@@ -332,8 +347,26 @@ const Index = () => {
         <section className=" bg-white">
           <div className="flex justify-between p-5">
             <div>Documents</div>
-            <div className="flex justify-center items-center">Documents</div>
+            <input type="file" id="file" ref={inputFile} onChange={handleAndUploadFile} style={{ display: "none" }} />
+            <Button className="flex justify-center items-center" onClick={onButtonClick}>
+              Add documents
+            </Button>
           </div>
+          <ol className="pl-9">
+            {fileList &&
+              fileList?.map((items: any) => {
+                return (
+                  <li
+                    className="border-black-500 py-2 cursor-pointer"
+                    onClick={() => {
+                      setUrl(items?.fileUrl);
+                    }}
+                  >
+                    {items?.fileName}
+                  </li>
+                );
+              })}
+          </ol>
         </section>
       </section>
     </main>
